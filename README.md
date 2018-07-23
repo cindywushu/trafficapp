@@ -1,4 +1,4 @@
-# trafficapp_0523
+# trafficapp
 參考網址：
 
 定位GoogleMap 
@@ -16,7 +16,9 @@ Retrofit教學
 
 Amazon
 登錄- https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fap-northeast-1.console.aws.amazon.com%2Felasticbeanstalk%2Fhome%3Fregion%3Dap-northeast-1%26state%3DhashArgs%2523%252Fenvironment%252Fdashboard%253FapplicationName%253DTraffic%2526environmentId%253De-fkermumwdu%26isauthcode%3Dtrue&client_id=arn%3Aaws%3Aiam%3A%3A015428540659%3Auser%2Felasticbeanstalk&forceMobileApp=0
+
 RDS- https://ap-northeast-1.console.aws.amazon.com/rds/home?region=ap-northeast-1#dbinstance:id=aa3dnfj9u7n51z
+
 Elastic Beanstalk- https://ap-northeast-1.console.aws.amazon.com/elasticbeanstalk/home?region=ap-northeast-1#/environment/dashboard?applicationName=Traffic&environmentId=e-fkermumwdu
 
 Elastic Beanstalk上傳php檔案：
@@ -24,8 +26,9 @@ Elastic Beanstalk上傳php檔案：
 先將index.php放進一個資料夾
 打開終端機
 到你設置資料夾的底下, 
-// 先打, ll //是查詢目前位置所有資料夾 
-// 再打, cd <<資料夾名稱>>  //到這個資料夾裡
+
+先打, ll //是查詢目前位置所有資料夾 
+再打, cd <<資料夾名稱>>  //到這個資料夾裡
 
 打下以下指令, 最好一次一個打
 pip install awsebcli    //下載amazon的cli
@@ -82,7 +85,8 @@ Select a keypair.
 eb deploy
  
  //按enter後跑出以下 為已成功！
- Creating application version archive "app-180709_233233".
+
+Creating application version archive "app-180709_233233".
 Uploading Traffic/app-180709_233233.zip to S3. This may take a while.
 Upload Complete.
 INFO: Environment update is starting.
