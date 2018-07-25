@@ -49,6 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LatLng yourposition;//定位點
     LatLng dbposition; //資料庫經緯度資料
+    double distance;
     //資料庫透過PHP將資料轉換成JSON連結的網址(使用Amazon)
     String url ="http://traffic-env.eennja8tqr.ap-northeast-1.elasticbeanstalk.com/";
     //一開始APP建置時(此階段不會顯示出來)
@@ -68,6 +69,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getRetrofitArray();//取得資料庫的資料
     }
 
+    Timer timer;
+    TimerTask timerTask;
+
+    //we are going to use a handler to be able to run in our TimerTask
+    final Handler handler = new Handler();
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -75,12 +82,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //onResume we start our timer so it can start when the app comes from the background
         startTimer();
     }
-
-    Timer timer;
-    TimerTask timerTask;
-
-    //we are going to use a handler to be able to run in our TimerTask
-    final Handler handler = new Handler();
 
     public void startTimer() {
         //set a new Timer
@@ -110,10 +111,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 handler.post(new Runnable() {
                     public void run() {
                         getRetrofitArray();
-                        //取得定位URL
-                        FetchUrl FetchUrl = new FetchUrl();
-                        //取得定位URL轉換成JSON的資料結果
-                        FetchUrl.execute(url);
                     }
                 });
             }
@@ -150,7 +147,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         yourposition = new LatLng(location.getLatitude(), location.getLongitude()); //定位點
 //        mMap.addMarker(new MarkerOptions().position(delhi).title("Delhi"));//Mark定位點
-        mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
+//        mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
         //當定位移動時的點
         mMap.moveCamera(CameraUpdateFactory.newLatLng(yourposition));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
@@ -158,6 +155,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
+
+        getRetrofitArray();
 
         //經緯度及距離的資料
         String str_origin = "origin=" + yourposition.latitude + "," + yourposition.longitude;
@@ -169,7 +168,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
 
         Log.d("onMapClick", url.toString());
-
+        //取得定位URL
+        FetchUrl FetchUrl = new FetchUrl();
+        //取得定位URL轉換成JSON的資料結果
+        FetchUrl.execute(url);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(yourposition));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(7));
     }
@@ -299,7 +301,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     List<Traffic> TrafficData = response.body();
 
-                    for ( int i = 0;i < TrafficData.size();i++) {
+                    for (int i = 0;i <= TrafficData.size();i++) {
                         //資料庫的經緯度資料的點
                         dbposition = new LatLng(Double.valueOf(TrafficData.get(i).getLatitude()), Double.valueOf(TrafficData.get(i).getLongitude()));
                         //定位點的經緯度
@@ -311,13 +313,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         dbposition_location.setLatitude(dbposition.latitude);
                         dbposition_location.setLongitude(dbposition.longitude);
 
-                        double distance = (yourposition_location.distanceTo(dbposition_location));
-                        //距離在?公尺內就跳出視窗顯示
-                        if (distance<=10000) {
-                            Toast.makeText(getApplicationContext(),"距離:"+distance+"公尺",Toast.LENGTH_SHORT).show();
+                        distance = (yourposition_location.distanceTo(dbposition_location));
+
+                        if (distance<=5000) {
+                            Toast.makeText(getApplicationContext(), TrafficData.get(i).getPlace() + distance, Toast.LENGTH_SHORT).show();
+                            break;
                         }
                     }
-
                 } catch (Exception e) {
                     Log.d("onResponse", "There is an error");
                     e.printStackTrace();
