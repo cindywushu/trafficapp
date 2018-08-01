@@ -116,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-
                 if (status == false)
                     //Here, the Location Service gets bound and the GPS Speedometer gets Active.
                     bindService();

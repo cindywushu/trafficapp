@@ -45,6 +45,7 @@ public class LocationService extends Service implements
         return mBinder;
     }
 
+
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(INTERVAL);
@@ -69,13 +70,11 @@ public class LocationService extends Service implements
         }
     }
 
-
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(
                 mGoogleApiClient, this);
         distance = 0;
     }
-
 
     @Override
     public void onConnectionSuspended(int i) {
