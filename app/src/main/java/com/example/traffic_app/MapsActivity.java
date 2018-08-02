@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
@@ -58,6 +57,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final long INTERVAL = 1000 * 2;
     private static final long FASTEST_INTERVAL = 1000 * 1;
     static TextView speedtext;
+    double speed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +75,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         getRetrofitArray();//取得資料庫的資料
+
+
     }
 
     /********定時器*******/
@@ -139,20 +141,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
+
         mLastLocation = location;
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
 
         yourposition = new LatLng(location.getLatitude(), location.getLongitude()); //定位點
 //        mMap.addMarker(new MarkerOptions().position(delhi).title("Delhi"));//Mark定位點
 //        mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(yourposition));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-
-        if (mGoogleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        }
 
         //經緯度及距離的資料
         String str_origin = "origin=" + yourposition.latitude + "," + yourposition.longitude;
@@ -168,13 +162,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         FetchUrl FetchUrl = new FetchUrl();
         //取得定位URL轉換成JSON的資料結果
         FetchUrl.execute(url);
+
         mMap.moveCamera(CameraUpdateFactory.newLatLng(yourposition));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(7));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
 
         //計算速度
-        double speed = location.getSpeed() * 18 / 5;
+        speed = location.getSpeed() * 18 / 5;
         MapsActivity.speedtext.setText("speed: " + new DecimalFormat("#.##").format(speed) + " km/hr");
         /* There you have it, a speed value in m/s */
+
+        //stop location updates
+//        if (mGoogleApiClient != null) {
+//            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+//        }
     }
 
     @Override
@@ -223,8 +223,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
-
-
             } else {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
@@ -302,6 +300,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (distance<=5000) {
                             Toast.makeText(getApplicationContext(), TrafficData.get(i).getPlace() + distance, Toast.LENGTH_SHORT).show();
                             break;
+                        }else if(speed>=100){
+                            Toast.makeText(getApplicationContext(), "超速", Toast.LENGTH_SHORT).show();
                         }
                     }
                 } catch (Exception e) {
