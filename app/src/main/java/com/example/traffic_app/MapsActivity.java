@@ -26,6 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -95,7 +96,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         timer = new Timer();
         initializeTimerTask();
         //schedule the timer, after the first 5000ms the TimerTask will run every 10000ms
-        timer.schedule(timerTask, 5000, 10000); //
+        timer.schedule(timerTask, 5000, 5000); //
     }
 
     public void stoptimertask(View v) {
@@ -112,6 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 handler.post(new Runnable() {
                     public void run() {
                         getRetrofitArray();
+                        speed();
                     }
                 });
             }
@@ -146,7 +148,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         yourposition = new LatLng(location.getLatitude(), location.getLongitude()); //定位點
 //        mMap.addMarker(new MarkerOptions().position(delhi).title("Delhi"));//Mark定位點
-//        mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
 
         //經緯度及距離的資料
         String str_origin = "origin=" + yourposition.latitude + "," + yourposition.longitude;
@@ -298,10 +299,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         distance = (yourposition_location.distanceTo(dbposition_location));
 
                         if (distance<=5000) {
+                            mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
                             Toast.makeText(getApplicationContext(), TrafficData.get(i).getPlace() + distance, Toast.LENGTH_SHORT).show();
                             break;
-                        }else if(speed>=100){
-                            Toast.makeText(getApplicationContext(), "超速", Toast.LENGTH_SHORT).show();
                         }
                     }
                 } catch (Exception e) {
@@ -315,6 +315,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("onFailure", t.toString());
             }
         });
+    }
+    public void speed(){
+        if(speed>=50){
+            Toast.makeText(getApplicationContext(), "超速", Toast.LENGTH_SHORT).show();
+        }
     }
     /********************/
 }
