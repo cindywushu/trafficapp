@@ -302,7 +302,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         distance = (yourposition_location.distanceTo(dbposition_location));
 
-                        if (distance==500) { //距離500公尺時通知
+                        if (distance<=505 && distance>=500) { //距離接近500公尺時通知
                             //使用聲音
                             Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
                             // 取得NotificationManager系統服務
@@ -314,7 +314,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             .setSound(soundUri)
                                             .setSmallIcon(R.mipmap.ic_launcher)
                                             .setContentTitle("注意")
-                                            .setContentText("前方五百公尺為十大危險路段");
+                                            .setContentText("前方約五百公尺處為十大危險路段");
                             Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
                             intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
                             // 建立PendingIntent物件
