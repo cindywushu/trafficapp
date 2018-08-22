@@ -175,11 +175,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //計算速度
         speed = location.getSpeed() * 18 / 5;
         MapsActivity.speedtext.setText("speed: " + new DecimalFormat("#.##").format(speed) + " km/hr");
-
-        //stop location updates
-//        if (mGoogleApiClient != null) {
-//            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-//        }
     }
 
     @Override
@@ -302,7 +297,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         distance = (yourposition_location.distanceTo(dbposition_location));
 
-                        if (distance<=505 && distance>=500) { //距離接近500公尺時通知
+                        if (distance<=505 && distance>=500) { //距離接近500公尺時通知 distance<=505 && distance>=500
+                            mMap.clear();
+                            mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
+                            Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
                             //使用聲音
                             Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
                             // 取得NotificationManager系統服務
@@ -314,7 +312,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             .setSound(soundUri)
                                             .setSmallIcon(R.mipmap.ic_launcher)
                                             .setContentTitle("注意")
-                                            .setContentText("前方約五百公尺處為十大危險路段");
+                                            .setContentText("前方約五百公尺處為危險路段");
                             Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
                             intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
                             // 建立PendingIntent物件
@@ -332,9 +330,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             note.ledOffMS = 300;
                             notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
                             break;
-                        }else if (distance<=500){ //500m內的點皆會被標記
-                            mMap.clear();
-                            mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
                         }
                     }
                 } catch (Exception e) {
@@ -362,7 +357,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             .setSound(soundUri)
                             .setSmallIcon(R.mipmap.ic_launcher)
                             .setContentTitle("注意")
-                            .setContentText("您已經超速！");
+                            .setContentText("超速, 您已進入危險路段, 請減速！");
             Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
             intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
             // 建立PendingIntent物件
@@ -382,4 +377,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
     /********************/
+    public void goto_Main(View view) {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        timer.cancel();
+        timer = null;
+        Intent intent=new Intent(MapsActivity.this,MainActivity.class);
+        startActivity(intent);
+    }
 }
