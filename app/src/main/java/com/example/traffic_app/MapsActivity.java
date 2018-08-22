@@ -2,13 +2,21 @@ package com.example.traffic_app;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -45,8 +53,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
-    Marker mCurrLocationMarker;
+    Location mLastLocation;//目前位置
+    Marker mCurrLocationMarker;//資料庫點的marker
     LocationRequest mLocationRequest;
 
     LatLng yourposition;//定位點
@@ -59,6 +67,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final long FASTEST_INTERVAL = 1000 * 1;
     static TextView speedtext;
     double speed;
+
+    private static final int NOTIF_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +86,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         getRetrofitArray();//取得資料庫的資料
-
-
     }
 
     /********定時器*******/
@@ -95,16 +103,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void startTimer() {
         timer = new Timer();
         initializeTimerTask();
-        //schedule the timer, after the first 5000ms the TimerTask will run every 10000ms
-        timer.schedule(timerTask, 5000, 5000); //
+        //第一次執行3秒, 之後每隔2秒執行一次
+        timer.schedule(timerTask, 3000, 2000); //
     }
 
-    public void stoptimertask(View v) {
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
+//    public void stoptimertask(View v) {
+//        if (timer != null) {
+//            timer.cancel();
+//            timer = null;
+//        }
+//    }
 
     public void initializeTimerTask() {
 
@@ -112,8 +120,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void run() {
                 handler.post(new Runnable() {
                     public void run() {
-                        getRetrofitArray();
-                        speed();
+                        getRetrofitArray();//執行尋找資料庫的點及通知
+                        speed();//檢查是否超速及通知
                     }
                 });
             }
@@ -143,11 +151,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-
         mLastLocation = location;
-
         yourposition = new LatLng(location.getLatitude(), location.getLongitude()); //定位點
-//        mMap.addMarker(new MarkerOptions().position(delhi).title("Delhi"));//Mark定位點
 
         //經緯度及距離的資料
         String str_origin = "origin=" + yourposition.latitude + "," + yourposition.longitude;
@@ -170,7 +175,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //計算速度
         speed = location.getSpeed() * 18 / 5;
         MapsActivity.speedtext.setText("speed: " + new DecimalFormat("#.##").format(speed) + " km/hr");
-        /* There you have it, a speed value in m/s */
 
         //stop location updates
 //        if (mGoogleApiClient != null) {
@@ -298,10 +302,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         distance = (yourposition_location.distanceTo(dbposition_location));
 
-                        if (distance<=5000) {
-                            mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
-                            Toast.makeText(getApplicationContext(), TrafficData.get(i).getPlace() + distance, Toast.LENGTH_SHORT).show();
+                        if (distance==500) { //距離500公尺時通知
+                            //使用聲音
+                            Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
+                            // 取得NotificationManager系統服務
+                            NotificationManager notiMgr = (NotificationManager)
+                                    getSystemService(NOTIFICATION_SERVICE);
+                            // 建立狀態列顯示的通知訊息
+                            NotificationCompat.Builder noti =
+                                    new NotificationCompat.Builder(MapsActivity.this)
+                                            .setSound(soundUri)
+                                            .setSmallIcon(R.mipmap.ic_launcher)
+                                            .setContentTitle("注意")
+                                            .setContentText("前方五百公尺為十大危險路段");
+                            Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+                            intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+                            // 建立PendingIntent物件
+                            PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+                            noti.setContentIntent(pIntent);  // 指定PendingIntent
+                            Notification note = noti.build();
+
+                            // 使用振動
+                            note.vibrate= new long[] {100, 250, 100, 500};
+                            // 使用LED
+                            note.ledARGB = Color.RED;
+                            note.flags |= Notification.FLAG_SHOW_LIGHTS;
+                            note.ledOnMS = 200;
+                            note.ledOffMS = 300;
+                            notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
                             break;
+                        }else if (distance<=500){ //500m內的點皆會被標記
+                            mMap.clear();
+                            mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition"));//Mark資料庫的點
                         }
                     }
                 } catch (Exception e) {
@@ -317,8 +350,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
     public void speed(){
-        if(speed>=50){
-            Toast.makeText(getApplicationContext(), "超速", Toast.LENGTH_SHORT).show();
+        if(speed>=110) { //國道規定最高速110~120
+            //使用聲音
+            Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.speeding);
+            // 取得NotificationManager系統服務
+            NotificationManager notiMgr = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
+            // 建立狀態列顯示的通知訊息
+            NotificationCompat.Builder speed =
+                    new NotificationCompat.Builder(MapsActivity.this)
+                            .setSound(soundUri)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle("注意")
+                            .setContentText("您已經超速！");
+            Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+            intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+            // 建立PendingIntent物件
+            PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+            speed.setContentIntent(pIntent);  // 指定PendingIntent
+            Notification note = speed.build();
+
+            // 使用振動
+            note.vibrate = new long[]{100, 250, 100, 500};
+            // 使用LED
+            note.ledARGB = Color.RED;
+            note.flags |= Notification.FLAG_SHOW_LIGHTS;
+            note.ledOnMS = 200;
+            note.ledOffMS = 300;
+            notiMgr.notify(NOTIF_ID, note);   // 送出通知訊息
         }
     }
     /********************/

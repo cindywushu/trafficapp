@@ -19,7 +19,7 @@ public class FetchUrl extends AsyncTask<String, Void, String> {
         String data = "";
 
         try {
-            // Fetching the data from web service
+            // Fetch資料從web service
             data = downloadUrl(url[0]);
             Log.d("Background Task data", data.toString());
         } catch (Exception e) {
@@ -33,7 +33,6 @@ public class FetchUrl extends AsyncTask<String, Void, String> {
         super.onPostExecute(result);
 
         ParserTask parserTask = new ParserTask();//使用ParserTask來處理結果
-        // Invokes the thread for parsing the JSON data
         parserTask.execute(result);
     }
 
