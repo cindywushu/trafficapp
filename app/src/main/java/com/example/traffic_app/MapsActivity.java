@@ -328,128 +328,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         if (all||(A1&&A2)){
                             if (TrafficData.get(i).getCategory().equals("A1")||TrafficData.get(i).getCategory().equals("A2")){
-                                if (distance<50000){
+                                if (distance<500){
                                     if (TrafficData.get(i).getCategory().equals("A1")){
-                                        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
-                                                .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                        addMarker_RED();
                                     }else {
-                                        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
-                                                .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                        addMarker_ORANGE();
                                     }
 
                                     if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
-                                        //使用聲音
-                                        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
-                                        // 取得NotificationManager系統服務
-                                        NotificationManager notiMgr = (NotificationManager)
-                                                getSystemService(NOTIFICATION_SERVICE);
-                                        // 建立狀態列顯示的通知訊息
-                                        NotificationCompat.Builder noti =
-                                                new NotificationCompat.Builder(MapsActivity.this)
-                                                        .setSound(soundUri)
-                                                        .setSmallIcon(R.mipmap.ic_launcher)
-                                                        .setContentTitle("注意")
-                                                        .setContentText("前方約五百公尺處為危險路段");
-                                        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
-                                        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
-                                        // 建立PendingIntent物件
-                                        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
-                                                PendingIntent.FLAG_UPDATE_CURRENT);
-                                        noti.setContentIntent(pIntent);  // 指定PendingIntent
-                                        Notification note = noti.build();
-
-                                        // 使用振動
-                                        note.vibrate= new long[] {100, 250, 100, 500};
-                                        // 使用LED
-                                        note.ledARGB = Color.RED;
-                                        note.flags |= Notification.FLAG_SHOW_LIGHTS;
-                                        note.ledOnMS = 200;
-                                        note.ledOffMS = 300;
-                                        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+                                        notification();
                                         break;
                                     }
                                 }
                             }
                         }else if(A1){
                             if (TrafficData.get(i).getCategory().equals("A1")){
-                                if (distance<50000){
-                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
-                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                if (distance<500){
+                                    addMarker_RED();
                                     if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
-                                        //使用聲音
-                                        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
-                                        // 取得NotificationManager系統服務
-                                        NotificationManager notiMgr = (NotificationManager)
-                                                getSystemService(NOTIFICATION_SERVICE);
-                                        // 建立狀態列顯示的通知訊息
-                                        NotificationCompat.Builder noti =
-                                                new NotificationCompat.Builder(MapsActivity.this)
-                                                        .setSound(soundUri)
-                                                        .setSmallIcon(R.mipmap.ic_launcher)
-                                                        .setContentTitle("注意")
-                                                        .setContentText("前方約五百公尺處為危險路段");
-                                        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
-                                        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
-                                        // 建立PendingIntent物件
-                                        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
-                                                PendingIntent.FLAG_UPDATE_CURRENT);
-                                        noti.setContentIntent(pIntent);  // 指定PendingIntent
-                                        Notification note = noti.build();
-
-                                        // 使用振動
-                                        note.vibrate= new long[] {100, 250, 100, 500};
-                                        // 使用LED
-                                        note.ledARGB = Color.RED;
-                                        note.flags |= Notification.FLAG_SHOW_LIGHTS;
-                                        note.ledOnMS = 200;
-                                        note.ledOffMS = 300;
-                                        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+                                        notification();
                                         break;
                                     }
                                 }
                             }
                         }else if (A2){
                             if (TrafficData.get(i).getCategory().equals("A2")){
-                                if (distance<50000){
-                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
-                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                if (distance<500){
+                                    addMarker_ORANGE();
                                     if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
-                                        //使用聲音
-                                        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
-                                        // 取得NotificationManager系統服務
-                                        NotificationManager notiMgr = (NotificationManager)
-                                                getSystemService(NOTIFICATION_SERVICE);
-                                        // 建立狀態列顯示的通知訊息
-                                        NotificationCompat.Builder noti =
-                                                new NotificationCompat.Builder(MapsActivity.this)
-                                                        .setSound(soundUri)
-                                                        .setSmallIcon(R.mipmap.ic_launcher)
-                                                        .setContentTitle("注意")
-                                                        .setContentText("前方約五百公尺處為危險路段");
-                                        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
-                                        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
-                                        // 建立PendingIntent物件
-                                        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
-                                                PendingIntent.FLAG_UPDATE_CURRENT);
-                                        noti.setContentIntent(pIntent);  // 指定PendingIntent
-                                        Notification note = noti.build();
-
-                                        // 使用振動
-                                        note.vibrate= new long[] {100, 250, 100, 500};
-                                        // 使用LED
-                                        note.ledARGB = Color.RED;
-                                        note.flags |= Notification.FLAG_SHOW_LIGHTS;
-                                        note.ledOnMS = 200;
-                                        note.ledOffMS = 300;
-                                        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+                                        notification();
                                         break;
                                     }
                                 }
                             }
                         }
+
                     }
 
                 } catch (Exception e) {
@@ -496,6 +409,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             note.ledOffMS = 300;
             notiMgr.notify(NOTIF_ID, note);   // 送出通知訊息
         }
+    }
+
+    public void notification(){
+        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
+        //使用聲音
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
+        // 取得NotificationManager系統服務
+        NotificationManager notiMgr = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        // 建立狀態列顯示的通知訊息
+        NotificationCompat.Builder noti =
+                new NotificationCompat.Builder(MapsActivity.this)
+                        .setSound(soundUri)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("注意")
+                        .setContentText("前方約五百公尺處為危險路段");
+        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+        // 建立PendingIntent物件
+        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        noti.setContentIntent(pIntent);  // 指定PendingIntent
+        Notification note = noti.build();
+
+        // 使用振動
+        note.vibrate= new long[] {100, 250, 100, 500};
+        // 使用LED
+        note.ledARGB = Color.RED;
+        note.flags |= Notification.FLAG_SHOW_LIGHTS;
+        note.ledOnMS = 200;
+        note.ledOffMS = 300;
+        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+    }
+
+    public void addMarker_RED(){
+        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+    }
+
+    public void addMarker_ORANGE(){
+        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
     }
     /********************/
     public void goto_Main(View view) {
