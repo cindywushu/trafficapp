@@ -5,7 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -18,6 +18,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -70,10 +71,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double speed;
 
     private static final int NOTIF_ID = 1;
-//    Boolean all = getIntent().getExtras().getBoolean("all");
-//    Boolean A1 = getIntent().getExtras().getBoolean("A1");
-//    Boolean A2 = getIntent().getExtras().getBoolean("A2");
-//    Boolean speednoti = getIntent().getExtras().getBoolean("speednoti");
+    Boolean all=false;
+    Boolean A1=false;
+    Boolean A2=false;
+    Boolean speednoti=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,14 +90,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        getRetrofitArray();//取得資料庫的資料
     }
 
     /********定時器*******/
     @Override
     protected void onResume() {
         super.onResume();
+        all = getIntent().getExtras().getBoolean("all");
+        A1 = getIntent().getExtras().getBoolean("A1");
+        A2 = getIntent().getExtras().getBoolean("A2");
+        speednoti = getIntent().getExtras().getBoolean("speednoti");
         startTimer();
     }
 
@@ -109,15 +112,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         timer = new Timer();
         initializeTimerTask();
         //第一次執行3秒, 之後每隔2秒執行一次
-        timer.schedule(timerTask, 3000, 1000);
+        timer.schedule(timerTask, 5000, 1000);
     }
-
-//    public void stoptimertask(View v) {
-//        if (timer != null) {
-//            timer.cancel();
-//            timer = null;
-//        }
-//    }
 
     public void initializeTimerTask() {
 
@@ -126,7 +122,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 handler.post(new Runnable() {
                     public void run() {
                         getRetrofitArray();//執行尋找資料庫的點及通知
-                        speed();//檢查是否超速及通知
                     }
                 });
             }
@@ -151,7 +146,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        builder.setTitle("注意！")
+                .setMessage("Map定位連結中斷！")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     @Override
@@ -178,14 +182,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
         mMap.clear();
 
-        //計算速度
-        speed = location.getSpeed() * 18 / 5;
-        MapsActivity.speedtext.setText("speed: " + new DecimalFormat("#.##").format(speed) + " km/hr");
+        if (all||speednoti){
+            //計算速度
+            speed = location.getSpeed() * 18 / 5;
+            speed();
+        }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-
+        AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+        builder.setTitle("注意！")
+                .setMessage("Map定位連結失敗！")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
     /********************/
 
@@ -259,7 +274,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
 
                 } else {
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                    builder.setTitle("注意！")
+                            .setMessage("Map認證失敗！")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
                 }
                 return;
             }
@@ -302,45 +326,132 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         distance = (yourposition_location.distanceTo(dbposition_location));
 
-                        if (distance<500){
+                        if (all||(A1&&A2)){
+                            if (TrafficData.get(i).getCategory().equals("A1")||TrafficData.get(i).getCategory().equals("A2")){
+                                if (distance<50000){
+                                    if (TrafficData.get(i).getCategory().equals("A1")){
+                                        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+                                                .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                    }else {
+                                        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+                                                .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                    }
 
-                            mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
-                                    .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                    if (distance<=505 && distance>=500) { //距離接近500公尺時通知
+                                        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
+                                        //使用聲音
+                                        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
+                                        // 取得NotificationManager系統服務
+                                        NotificationManager notiMgr = (NotificationManager)
+                                                getSystemService(NOTIFICATION_SERVICE);
+                                        // 建立狀態列顯示的通知訊息
+                                        NotificationCompat.Builder noti =
+                                                new NotificationCompat.Builder(MapsActivity.this)
+                                                        .setSound(soundUri)
+                                                        .setSmallIcon(R.mipmap.ic_launcher)
+                                                        .setContentTitle("注意")
+                                                        .setContentText("前方約五百公尺處為危險路段");
+                                        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+                                        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+                                        // 建立PendingIntent物件
+                                        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                                                PendingIntent.FLAG_UPDATE_CURRENT);
+                                        noti.setContentIntent(pIntent);  // 指定PendingIntent
+                                        Notification note = noti.build();
 
-                            if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
-                                //使用聲音
-                                Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
-                                // 取得NotificationManager系統服務
-                                NotificationManager notiMgr = (NotificationManager)
-                                        getSystemService(NOTIFICATION_SERVICE);
-                                // 建立狀態列顯示的通知訊息
-                                NotificationCompat.Builder noti =
-                                        new NotificationCompat.Builder(MapsActivity.this)
-                                                .setSound(soundUri)
-                                                .setSmallIcon(R.mipmap.ic_launcher)
-                                                .setContentTitle("注意")
-                                                .setContentText("前方約五百公尺處為危險路段");
-                                Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
-                                intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
-                                // 建立PendingIntent物件
-                                PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
-                                        PendingIntent.FLAG_UPDATE_CURRENT);
-                                noti.setContentIntent(pIntent);  // 指定PendingIntent
-                                Notification note = noti.build();
+                                        // 使用振動
+                                        note.vibrate= new long[] {100, 250, 100, 500};
+                                        // 使用LED
+                                        note.ledARGB = Color.RED;
+                                        note.flags |= Notification.FLAG_SHOW_LIGHTS;
+                                        note.ledOnMS = 200;
+                                        note.ledOffMS = 300;
+                                        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+                                        break;
+                                    }
+                                }
+                            }
+                        }else if(A1){
+                            if (TrafficData.get(i).getCategory().equals("A1")){
+                                if (distance<50000){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                    if (distance<=505 && distance>=500) { //距離接近500公尺時通知
+                                        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
+                                        //使用聲音
+                                        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
+                                        // 取得NotificationManager系統服務
+                                        NotificationManager notiMgr = (NotificationManager)
+                                                getSystemService(NOTIFICATION_SERVICE);
+                                        // 建立狀態列顯示的通知訊息
+                                        NotificationCompat.Builder noti =
+                                                new NotificationCompat.Builder(MapsActivity.this)
+                                                        .setSound(soundUri)
+                                                        .setSmallIcon(R.mipmap.ic_launcher)
+                                                        .setContentTitle("注意")
+                                                        .setContentText("前方約五百公尺處為危險路段");
+                                        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+                                        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+                                        // 建立PendingIntent物件
+                                        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                                                PendingIntent.FLAG_UPDATE_CURRENT);
+                                        noti.setContentIntent(pIntent);  // 指定PendingIntent
+                                        Notification note = noti.build();
 
-                                // 使用振動
-                                note.vibrate= new long[] {100, 250, 100, 500};
-                                // 使用LED
-                                note.ledARGB = Color.RED;
-                                note.flags |= Notification.FLAG_SHOW_LIGHTS;
-                                note.ledOnMS = 200;
-                                note.ledOffMS = 300;
-                                notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
-                                break;
+                                        // 使用振動
+                                        note.vibrate= new long[] {100, 250, 100, 500};
+                                        // 使用LED
+                                        note.ledARGB = Color.RED;
+                                        note.flags |= Notification.FLAG_SHOW_LIGHTS;
+                                        note.ledOnMS = 200;
+                                        note.ledOffMS = 300;
+                                        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+                                        break;
+                                    }
+                                }
+                            }
+                        }else if (A2){
+                            if (TrafficData.get(i).getCategory().equals("A2")){
+                                if (distance<50000){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                    if (distance<=505 && distance>=500) { //距離接近500公尺時通知
+                                        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
+                                        //使用聲音
+                                        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
+                                        // 取得NotificationManager系統服務
+                                        NotificationManager notiMgr = (NotificationManager)
+                                                getSystemService(NOTIFICATION_SERVICE);
+                                        // 建立狀態列顯示的通知訊息
+                                        NotificationCompat.Builder noti =
+                                                new NotificationCompat.Builder(MapsActivity.this)
+                                                        .setSound(soundUri)
+                                                        .setSmallIcon(R.mipmap.ic_launcher)
+                                                        .setContentTitle("注意")
+                                                        .setContentText("前方約五百公尺處為危險路段");
+                                        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+                                        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+                                        // 建立PendingIntent物件
+                                        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                                                PendingIntent.FLAG_UPDATE_CURRENT);
+                                        noti.setContentIntent(pIntent);  // 指定PendingIntent
+                                        Notification note = noti.build();
+
+                                        // 使用振動
+                                        note.vibrate= new long[] {100, 250, 100, 500};
+                                        // 使用LED
+                                        note.ledARGB = Color.RED;
+                                        note.flags |= Notification.FLAG_SHOW_LIGHTS;
+                                        note.ledOnMS = 200;
+                                        note.ledOffMS = 300;
+                                        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }
+
                 } catch (Exception e) {
                     Log.d("onResponse", "There is an error");
                     e.printStackTrace();
@@ -354,6 +465,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
     public void speed(){
+        MapsActivity.speedtext.setText("車速: " + new DecimalFormat("#.##").format(speed) + " km/hr");
         if(speed>=110) { //國道規定最高速110~120
             //使用聲音
             Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.speeding);

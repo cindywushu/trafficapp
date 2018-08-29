@@ -55,6 +55,12 @@
             android:text="GO TO MAP"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="323dp" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="若勾選'全部'，請勿再勾選其他項目！" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

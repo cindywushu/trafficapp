@@ -1,9 +1,14 @@
 package com.example.traffic_app;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,24 +19,29 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CheckBox;
-import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static CheckBox all;
-    static CheckBox A1;
-    static CheckBox A2;
-    static CheckBox speednoti;
+    CheckBox allcheck;
+    CheckBox A1check;
+    CheckBox A2check;
+    CheckBox speednoticheck;
+    Boolean all;
+    Boolean A1;
+    Boolean A2;
+    Boolean speednoti;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        all = (CheckBox)findViewById(R.id.all);
-        A1 = (CheckBox)findViewById(R.id.A1);
-        A2 = (CheckBox)findViewById(R.id.A2);
-        speednoti = (CheckBox)findViewById(R.id.speed);
+        allcheck = (CheckBox)findViewById(R.id.all);
+        A1check = (CheckBox)findViewById(R.id.A1);
+        A2check = (CheckBox)findViewById(R.id.A2);
+        speednoticheck = (CheckBox)findViewById(R.id.speed);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -112,11 +122,40 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void goto_Map(View view) {
-        Intent intent=new Intent(MainActivity.this,MapsActivity.class);
-//        intent.putExtra("all", all.isChecked());
-//        intent.putExtra("A1", A1.isChecked());
-//        intent.putExtra("A2", A2.isChecked());
-//        intent.putExtra("speednoti", speednoti.isChecked());
-        startActivity(intent);
+        all = allcheck.isChecked();
+        A1 = A1check.isChecked();
+        A2 = A2check.isChecked();
+        speednoti = speednoticheck.isChecked();
+
+        if (!all && !A1 && !A2 && !speednoti){
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("注意！")
+                    .setMessage("請選擇服務項目！")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }else if (all&&(A1 || A2 || speednoti)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("注意！")
+                    .setMessage("已重複選擇，請更改！")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }else {
+            Intent intent=new Intent(MainActivity.this,MapsActivity.class);
+            intent.putExtra("all", all);
+            intent.putExtra("A1", A1);
+            intent.putExtra("A2", A2);
+            intent.putExtra("speednoti", speednoti);
+            startActivity(intent);
+        }
     }
 }
