@@ -10,6 +10,7 @@ public class Traffic {
      * sort : 營業用-半聯結車;營業用-半聯結車
      * longitude : 120.41
      * latitude : 23.5382
+     * category : A1
      */
 
     private String id;
@@ -19,6 +20,7 @@ public class Traffic {
     private String sort;
     private String longitude;
     private String latitude;
+    private String category;
 
     public String getId() {
         return id;
@@ -76,4 +78,11 @@ public class Traffic {
         this.latitude = latitude;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 }

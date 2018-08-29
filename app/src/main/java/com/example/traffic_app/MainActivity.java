@@ -13,14 +13,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CheckBox;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    static CheckBox all;
+    static CheckBox A1;
+    static CheckBox A2;
+    static CheckBox speednoti;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        all = (CheckBox)findViewById(R.id.all);
+        A1 = (CheckBox)findViewById(R.id.A1);
+        A2 = (CheckBox)findViewById(R.id.A2);
+        speednoti = (CheckBox)findViewById(R.id.speed);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -102,6 +113,10 @@ public class MainActivity extends AppCompatActivity
 
     public void goto_Map(View view) {
         Intent intent=new Intent(MainActivity.this,MapsActivity.class);
+//        intent.putExtra("all", all.isChecked());
+//        intent.putExtra("A1", A1.isChecked());
+//        intent.putExtra("A2", A2.isChecked());
+//        intent.putExtra("speednoti", speednoti.isChecked());
         startActivity(intent);
     }
 }

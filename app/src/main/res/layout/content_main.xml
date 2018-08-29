@@ -8,13 +8,53 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="goto_Map"
-        android:text="GO TO MAP"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="89dp" />
+    <LinearLayout
+        android:layout_width="368dp"
+        android:layout_height="239dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="134dp">
+
+        <CheckBox
+            android:id="@+id/all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="全部"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="208dp" />
+
+        <CheckBox
+            android:id="@+id/A1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A1"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="239dp" />
+
+        <CheckBox
+            android:id="@+id/A2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A2"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="271dp" />
+
+        <CheckBox
+            android:id="@+id/speed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="超速提醒"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="303dp" />
+
+        <Button
+            android:id="@+id/goto_map"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="goto_Map"
+            android:text="GO TO MAP"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="323dp" />
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
