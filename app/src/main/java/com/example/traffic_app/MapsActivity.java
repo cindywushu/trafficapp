@@ -18,6 +18,8 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -90,44 +92,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-    }
 
-    /********定時器*******/
-    @Override
-    protected void onResume() {
-        super.onResume();
         all = getIntent().getExtras().getBoolean("all");
         A1 = getIntent().getExtras().getBoolean("A1");
         A2 = getIntent().getExtras().getBoolean("A2");
         speednoti = getIntent().getExtras().getBoolean("speednoti");
-        startTimer();
+
+        getRetrofitArray();
     }
 
-    Timer timer;
-    java.util.TimerTask timerTask;
-
-    final Handler handler = new Handler();
-
-    public void startTimer() {
-        timer = new Timer();
-        initializeTimerTask();
-        //第一次執行3秒, 之後每隔2秒執行一次
-        timer.schedule(timerTask, 5000, 1000);
+    @Override
+    public void onBackPressed() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        super.onBackPressed();
     }
-
-    public void initializeTimerTask() {
-
-        timerTask = new java.util.TimerTask() {
-            public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                        getRetrofitArray();//執行尋找資料庫的點及通知
-                    }
-                });
-            }
-        };
-    }
-    /********************/
 
     /********定位********/
     @Override
@@ -182,9 +160,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
         mMap.clear();
 
+        getRetrofitArray();//執行尋找資料庫的點及通知
+
         if (all||speednoti){
             //計算速度
-            speed = location.getSpeed() * 18 / 5;
+            speed = mLastLocation.getSpeed() * 18 / 5;
+            MapsActivity.speedtext.setText("車速: " + new DecimalFormat("#.##").format(speed) + " km/hr");
             speed();
         }
     }
@@ -334,31 +315,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }else {
                                         addMarker_ORANGE();
                                     }
-
-                                    if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                        notification();
-                                        break;
-                                    }
+                                    notification();
+                                    break;
                                 }
                             }
                         }else if(A1){
                             if (TrafficData.get(i).getCategory().equals("A1")){
                                 if (distance<500){
                                     addMarker_RED();
-                                    if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                        notification();
-                                        break;
-                                    }
+                                    notification();
+                                    break;
                                 }
                             }
                         }else if (A2){
                             if (TrafficData.get(i).getCategory().equals("A2")){
                                 if (distance<500){
                                     addMarker_ORANGE();
-                                    if (distance<=505 && distance>=500) { //距離接近500公尺時通知
-                                        notification();
-                                        break;
-                                    }
+                                    notification();
+                                    break;
                                 }
                             }
                         }
@@ -378,7 +352,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
     public void speed(){
-        MapsActivity.speedtext.setText("車速: " + new DecimalFormat("#.##").format(speed) + " km/hr");
         if(speed>=110) { //國道規定最高速110~120
             //使用聲音
             Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.speeding);
@@ -455,9 +428,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /********************/
     public void goto_Main(View view) {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        timer.cancel();
-        timer = null;
         Intent intent=new Intent(MapsActivity.this,MainActivity.class);
         startActivity(intent);
     }
+
+//    /********定時器*******/
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        startTimer();
+//    }
+//
+//    Timer timer;
+//    java.util.TimerTask timerTask;
+//
+//    final Handler handler = new Handler();
+//
+//    public void startTimer() {
+//        timer = new Timer();
+//        initializeTimerTask();
+//        //第一次執行3秒, 之後每隔2秒執行一次
+//        timer.schedule(timerTask, 2000, 1000);
+//    }
+//
+//    public void initializeTimerTask() {
+//
+//        timerTask = new java.util.TimerTask() {
+//            public void run() {
+//                handler.post(new Runnable() {
+//                    public void run() {
+//
+//                    }
+//                });
+//            }
+//        };
+//    }
+//    stop timer:
+//    timer.cancel();
+//    timer = null;
+//    /********************/
 }

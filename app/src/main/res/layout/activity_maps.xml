@@ -14,45 +14,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.example.traffic_app.MapsActivity" />
-
-    <android.support.design.widget.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="20pt"
+        android:orientation="horizontal">
 
-        <LinearLayout
+        <Button
+            android:id="@+id/button"
+            android:layout_width="136dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="goto_Main"
+            android:text="回首頁" />
+
+        <TextView
+            android:id="@+id/speedtext"
             android:layout_width="match_parent"
             android:layout_height="20pt"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="80pt"
-                android:layout_height="20pt"
-                android:layout_weight="1"
-                android:onClick="goto_Main"
-                android:text="回主頁" />
-
-            <TextView
-                android:id="@+id/speedtext"
-                android:layout_width="match_parent"
-                android:layout_height="20pt"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="1"
-                android:gravity="left"
-                android:singleLine="true"
-                android:textColor="@android:color/black"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
+            android:layout_marginLeft="5dp"
+            android:layout_weight="1"
+            android:gravity="left"
+            android:singleLine="true"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+    </LinearLayout>
 
 </FrameLayout>
