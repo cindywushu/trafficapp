@@ -15,11 +15,11 @@ public class FetchUrl extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... url) {
-        // For storing data from web service
+        //為了儲存資料從web service
         String data = "";
 
         try {
-            // Fetch資料從web service
+            //抓取資料從web service
             data = downloadUrl(url[0]);
             Log.d("Background Task data", data.toString());
         } catch (Exception e) {

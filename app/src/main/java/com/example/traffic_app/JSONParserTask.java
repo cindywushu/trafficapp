@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+//計算距離
 public class JSONParserTask {
     public List<List<HashMap<String,String>>> parse(JSONObject jObject){
 

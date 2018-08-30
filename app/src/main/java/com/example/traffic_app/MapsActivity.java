@@ -63,20 +63,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     LatLng yourposition;//定位點
     LatLng dbposition; //資料庫經緯度資料
-    double distance;
+    double distance;//定位與資料庫點的距離
     //資料庫透過PHP將資料轉換成JSON連結的網址(使用Amazon)
     String url = "http://traffic-env.eennja8tqr.ap-northeast-1.elasticbeanstalk.com/";
 
-    private static final long INTERVAL = 1000 * 2;
-    private static final long FASTEST_INTERVAL = 1000 * 1;
-    static TextView speedtext;
-    double speed;
+    private static final long INTERVAL = 1000 * 2;//第一次執行時間2秒
+    private static final long FASTEST_INTERVAL = 1000 * 1;//第一次後每隔1秒執行一次
+    static TextView speedtext;//車速顯示的text
+    double speed;//車速
 
     private static final int NOTIF_ID = 1;
-    Boolean all=false;
-    Boolean A1=false;
-    Boolean A2=false;
-    Boolean speednoti=false;
+    Boolean all=false;//全部勾選預設為false
+    Boolean A1=false;//A1勾選預設為false
+    Boolean A2=false;//A2勾選預設為false
+    Boolean speednoti=false;//超速提醒勾選預設為false
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,30 +86,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         speedtext = (TextView) findViewById(R.id.speedtext);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            checkLocationPermission();
+            checkLocationPermission(); //檢查Map的定位認證
         }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //取得MainActivity的勾選值(是否有勾選)
         all = getIntent().getExtras().getBoolean("all");
         A1 = getIntent().getExtras().getBoolean("A1");
         A2 = getIntent().getExtras().getBoolean("A2");
         speednoti = getIntent().getExtras().getBoolean("speednoti");
-
+        //執行尋找資料庫的點及通知
         getRetrofitArray();
     }
 
     @Override
     public void onBackPressed() {
+        //若按手機內建的返回鍵, 則關閉定位服務
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         super.onBackPressed();
     }
 
     /********定位********/
     @Override
-    public void onConnected(Bundle bundle) {
+    public void onConnected(Bundle bundle) { //連結定位
 
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(INTERVAL);
@@ -123,7 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
+    public void onConnectionSuspended(int i) { //定位中斷時, Alert視窗通知
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
         builder.setTitle("注意！")
                 .setMessage("Map定位連結中斷！")
@@ -137,8 +139,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
+    public void onLocationChanged(Location location) { //定位改變時
+        mLastLocation = location; //目前的定位位置
         yourposition = new LatLng(location.getLatitude(), location.getLongitude()); //定位點
 
         //經緯度及距離的資料
@@ -155,23 +157,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         FetchUrl FetchUrl = new FetchUrl();
         //取得定位URL轉換成JSON的資料結果
         FetchUrl.execute(url);
-
+        //顯示定位點在地圖上
         mMap.moveCamera(CameraUpdateFactory.newLatLng(yourposition));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-        mMap.clear();
+        mMap.clear();//將Map原先有的全清除(eg.Marker)
 
         getRetrofitArray();//執行尋找資料庫的點及通知
 
-        if (all||speednoti){
-            //計算速度
-            speed = mLastLocation.getSpeed() * 18 / 5;
+        if (all||speednoti){ //若勾選全部或超速提醒時
+            speed = mLastLocation.getSpeed() * 18 / 5;//計算速度
             MapsActivity.speedtext.setText("車速: " + new DecimalFormat("#.##").format(speed) + " km/hr");
-            speed();
+            speed();//Notification提醒
         }
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(ConnectionResult connectionResult) { //定位失敗時, Alert視窗通知
         AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
         builder.setTitle("注意！")
                 .setMessage("Map定位連結失敗！")
@@ -200,12 +201,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         else {
-            buildGoogleApiClient();
+            buildGoogleApiClient();//建立Api連線
             mMap.setMyLocationEnabled(true);
         }
     }
 
-    public void buildGoogleApiClient() {
+    public void buildGoogleApiClient() { //Map的Api連線(金鑰認證)
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -215,8 +216,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    //檢查Map的認證
-    public boolean checkLocationPermission(){
+
+    public boolean checkLocationPermission(){ //檢查Map的定位認證
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -296,40 +297,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     for (int i = 0;i <= TrafficData.size();i++) {
                         //資料庫的經緯度資料的點
                         dbposition = new LatLng(Double.valueOf(TrafficData.get(i).getLatitude()), Double.valueOf(TrafficData.get(i).getLongitude()));
-
+                        //目前位置的經緯度
                         Location yourposition_location = new Location("Yourposition");
                         yourposition_location.setLatitude(yourposition.latitude);
                         yourposition_location.setLongitude(yourposition.longitude);
-
+                        //資料庫點的經緯度
                         Location dbposition_location = new Location("Dbposition");
                         dbposition_location.setLatitude(dbposition.latitude);
                         dbposition_location.setLongitude(dbposition.longitude);
-
+                        //計算距離
                         distance = (yourposition_location.distanceTo(dbposition_location));
 
-                        if (all||(A1&&A2)){
+                        if (all||(A1&&A2)){ //若勾選全部或A1及A2
                             if (TrafficData.get(i).getCategory().equals("A1")||TrafficData.get(i).getCategory().equals("A2")){
-                                if (distance<500){
+                                if (distance<500){ //顯示所有距離500m內的點
                                     if (TrafficData.get(i).getCategory().equals("A1")){
-                                        addMarker_RED();
+                                        addMarker_RED(); //A1類顯示紅點
                                     }else {
-                                        addMarker_ORANGE();
+                                        addMarker_ORANGE(); //A2類顯示橘點
                                     }
-                                    notification();
+                                    notification(); //提醒通知
                                 }
                             }
-                        }else if(A1){
+                        }else if(A1){ //若勾選A1
                             if (TrafficData.get(i).getCategory().equals("A1")){
-                                if (distance<500){
-                                    addMarker_RED();
-                                    notification();
+                                if (distance<500){ //顯示所有距離500m內的點
+                                    addMarker_RED(); //A1類顯示紅點
+                                    notification(); //提醒通知
                                 }
                             }
-                        }else if (A2){
+                        }else if (A2){ //若勾選A2
                             if (TrafficData.get(i).getCategory().equals("A2")){
-                                if (distance<500){
-                                    addMarker_ORANGE();
-                                    notification();
+                                if (distance<500){ //顯示所有距離500m內的點
+                                    addMarker_ORANGE(); //A2類顯示橘點
+                                    notification(); //提醒通知
                                 }
                             }
                         }
@@ -348,7 +349,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-    public void speed(){
+    public void speed(){ //超速的提醒
         if(speed>=110) { //國道規定最高速110~120
             //使用聲音
             Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.speeding);
@@ -381,8 +382,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void notification(){
-        //Toast.makeText(getBaseContext(),"距離："+ distance, Toast.LENGTH_LONG).show();
+    public void notification(){ //在設定距離內的危險路段提醒
         //使用聲音
         Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
         // 取得NotificationManager系統服務
@@ -413,17 +413,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
     }
 
-    public void addMarker_RED(){
+    public void addMarker_RED(){ //A1類顯示紅點
         mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
     }
 
-    public void addMarker_ORANGE(){
+    public void addMarker_ORANGE(){ //A2類顯示橘點
         mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
     }
     /********************/
-    public void goto_Main(View view) {
+    public void goto_Main(View view) { //回首頁的button, 按下會關閉服務並回首頁(MainActivity)
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         Intent intent=new Intent(MapsActivity.this,MainActivity.class);
         startActivity(intent);

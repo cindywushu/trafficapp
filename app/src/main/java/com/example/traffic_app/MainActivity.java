@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity
         A2 = A2check.isChecked();
         speednoti = speednoticheck.isChecked();
 
-        if (!all && !A1 && !A2 && !speednoti){
+        if (!all && !A1 && !A2 && !speednoti){ //若勾選為空
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("注意！")
                     .setMessage("請選擇服務項目！")
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
-        }else if (all&&(A1 || A2 || speednoti)){
+        }else if (all&&(A1 || A2 || speednoti)){ //若勾選為全部及其他選項
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("注意！")
                     .setMessage("已重複選擇，請更改！")
