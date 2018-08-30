@@ -316,7 +316,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         addMarker_ORANGE();
                                     }
                                     notification();
-                                    break;
                                 }
                             }
                         }else if(A1){
@@ -324,7 +323,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (distance<500){
                                     addMarker_RED();
                                     notification();
-                                    break;
                                 }
                             }
                         }else if (A2){
@@ -332,7 +330,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (distance<500){
                                     addMarker_ORANGE();
                                     notification();
-                                    break;
                                 }
                             }
                         }

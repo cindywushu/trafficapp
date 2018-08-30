@@ -2,10 +2,12 @@ package com.example.traffic_app;
 
 //透過Gsonformat創建的資料庫類別
 public class Traffic {
+
     /**
      * id : 3
      * time : 105年01月04日 12時05分
      * place : 嘉義縣民雄鄉國道一號259公里250公尺處北向外側車道
+     * city : null
      * nums : 死亡1;受傷0
      * sort : 營業用-半聯結車;營業用-半聯結車
      * longitude : 120.41
@@ -16,6 +18,7 @@ public class Traffic {
     private String id;
     private String time;
     private String place;
+    private Object city;
     private String nums;
     private String sort;
     private String longitude;
@@ -44,6 +47,14 @@ public class Traffic {
 
     public void setPlace(String place) {
         this.place = place;
+    }
+
+    public Object getCity() {
+        return city;
+    }
+
+    public void setCity(Object city) {
+        this.city = city;
     }
 
     public String getNums() {
