@@ -12,19 +12,15 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -35,14 +31,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Timer;
 
 import retrofit.Call;
 import retrofit.Callback;
@@ -53,7 +50,7 @@ import retrofit.Retrofit;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener{
 
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
@@ -70,6 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final long INTERVAL = 1000 * 2;//第一次執行時間2秒
     private static final long FASTEST_INTERVAL = 1000 * 1;//第一次後每隔1秒執行一次
     static TextView speedtext;//車速顯示的text
+    static TextView distancetext;//距離顯示的text
     double speed;//車速
 
     private static final int NOTIF_ID = 1;
@@ -84,6 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         speedtext = (TextView) findViewById(R.id.speedtext);
+        distancetext = (TextView) findViewById(R.id.distancetext);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkLocationPermission(); //檢查Map的定位認證
@@ -98,6 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         A1 = getIntent().getExtras().getBoolean("A1");
         A2 = getIntent().getExtras().getBoolean("A2");
         speednoti = getIntent().getExtras().getBoolean("speednoti");
+
         //執行尋找資料庫的點及通知
         getRetrofitArray();
     }
@@ -141,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) { //定位改變時
         mLastLocation = location; //目前的定位位置
-        yourposition = new LatLng(location.getLatitude(), location.getLongitude()); //定位點
+        yourposition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()); //定位點
 
         //經緯度及距離的資料
         String str_origin = "origin=" + yourposition.latitude + "," + yourposition.longitude;
@@ -159,14 +159,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         FetchUrl.execute(url);
         //顯示定位點在地圖上
         mMap.moveCamera(CameraUpdateFactory.newLatLng(yourposition));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
         mMap.clear();//將Map原先有的全清除(eg.Marker)
+
+        updateCameraBearing(mMap, mLastLocation.getBearing());//更新攝影機方向
 
         getRetrofitArray();//執行尋找資料庫的點及通知
 
         if (all||speednoti){ //若勾選全部或超速提醒時
             speed = mLastLocation.getSpeed() * 18 / 5;//計算速度
-            MapsActivity.speedtext.setText("車速: " + new DecimalFormat("#.##").format(speed) + " km/hr");
+            MapsActivity.speedtext.setText("車速: " + new DecimalFormat("#.##").format(speed) + " 公里/小時");
             speed();//Notification提醒
         }
     }
@@ -184,6 +185,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }
+
+    private void updateCameraBearing(GoogleMap googleMap, float bearing) { //更新攝影機方向
+        if ( googleMap == null) return;
+        CameraPosition camPos = CameraPosition
+                .builder(
+                        googleMap.getCameraPosition()
+                )
+                .bearing(bearing)
+                .target(yourposition)
+                .zoom(18)
+                .tilt(90)
+                .build();
+        mMap.setMinZoomPreference(10);
+        mMap.setMaxZoomPreference(20);
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
+    }
     /********************/
 
     /*******Map準備*******/
@@ -191,13 +208,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mMap.setMinZoomPreference(12);
+        mMap.setIndoorEnabled(true);
+        mMap.setBuildingsEnabled(true);
+        UiSettings uiSettings = mMap.getUiSettings();
+        uiSettings.setIndoorLevelPickerEnabled(true);
+        uiSettings.setMyLocationButtonEnabled(true);
+        uiSettings.setMapToolbarEnabled(true);
+        uiSettings.setCompassEnabled(true);
+        uiSettings.setZoomControlsEnabled(true);
+        uiSettings.setRotateGesturesEnabled(true);
+        uiSettings.setScrollGesturesEnabled(true);
+        uiSettings.setTiltGesturesEnabled(true);
+        uiSettings.setZoomGesturesEnabled(true);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 buildGoogleApiClient();
-                mMap.setMyLocationEnabled(true);
+                mMap.setMyLocationEnabled(true);//顯示用戶的當前位置
             }
         }
         else {
@@ -232,7 +262,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         MY_PERMISSIONS_REQUEST_LOCATION);
             }
             return false;
-        } else {
+        } else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED){
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            } else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        }else {
             return true;
         }
     }
@@ -311,6 +355,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (all||(A1&&A2)){ //若勾選全部或A1及A2
                             if (TrafficData.get(i).getCategory().equals("A1")||TrafficData.get(i).getCategory().equals("A2")){
                                 if (distance<500){ //顯示所有距離500m內的點
+                                    MapsActivity.distancetext.setText("離危險路段距離約: " + new DecimalFormat("#.##").format(distance) + "公尺");
                                     if (TrafficData.get(i).getCategory().equals("A1")){
                                         addMarker_RED(); //A1類顯示紅點
                                     }else {
@@ -322,6 +367,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }else if(A1){ //若勾選A1
                             if (TrafficData.get(i).getCategory().equals("A1")){
                                 if (distance<500){ //顯示所有距離500m內的點
+                                    MapsActivity.distancetext.setText("離危險路段距離約: " + new DecimalFormat("#.##").format(distance) + "公尺");
                                     addMarker_RED(); //A1類顯示紅點
                                     notification(); //提醒通知
                                 }
@@ -329,6 +375,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }else if (A2){ //若勾選A2
                             if (TrafficData.get(i).getCategory().equals("A2")){
                                 if (distance<500){ //顯示所有距離500m內的點
+                                    MapsActivity.distancetext.setText("離危險路段距離約: " + new DecimalFormat("#.##").format(distance) + "公尺");
                                     addMarker_ORANGE(); //A2類顯示橘點
                                     notification(); //提醒通知
                                 }
@@ -361,7 +408,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     new NotificationCompat.Builder(MapsActivity.this)
                             .setSound(soundUri)
                             .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle("注意")
+                            .setContentTitle("注意！")
                             .setContentText("超速, 您已進入危險路段, 請減速！");
             Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
             intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
@@ -384,7 +431,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void notification(){ //在設定距離內的危險路段提醒
         //使用聲音
-        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.dan_ten);
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.noti_500);
         // 取得NotificationManager系統服務
         NotificationManager notiMgr = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
@@ -393,8 +440,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new NotificationCompat.Builder(MapsActivity.this)
                         .setSound(soundUri)
                         .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("注意")
-                        .setContentText("前方約五百公尺處為危險路段");
+                        .setContentTitle("注意！")
+                        .setContentText("前方五百公尺內為危險路段, 請小心駕駛！");
         Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
         intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
         // 建立PendingIntent物件
@@ -414,12 +461,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void addMarker_RED(){ //A1類顯示紅點
-        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
     }
 
     public void addMarker_ORANGE(){ //A2類顯示橘點
-        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("Dbposition").icon(BitmapDescriptorFactory
+        mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
     }
     /********************/
@@ -464,4 +511,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //    timer.cancel();
 //    timer = null;
 //    /********************/
+//    Toast.makeText(MapsActivity.this, "bearing:"+bearing, Toast.LENGTH_LONG).show();
 }
