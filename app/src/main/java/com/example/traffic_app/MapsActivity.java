@@ -197,8 +197,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .zoom(18)
                 .tilt(90)
                 .build();
-        mMap.setMinZoomPreference(10);
-        mMap.setMaxZoomPreference(20);
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
     }
     /********************/
@@ -208,7 +206,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        mMap.setMinZoomPreference(12);
+        mMap.setMinZoomPreference(10);
+        mMap.setMaxZoomPreference(20);
         mMap.setIndoorEnabled(true);
         mMap.setBuildingsEnabled(true);
         UiSettings uiSettings = mMap.getUiSettings();
