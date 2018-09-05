@@ -12,6 +12,7 @@
         android:name="com.example.barcodelibrary.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.example.barcodelibrary.permission.MAPS_RECEIVE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
@@ -42,12 +43,12 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
-        </activity>
+            android:label="@string/title_activity_maps" />
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar">
+
             <!-- 進入時的Activity -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,6 +56,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".InquireActivity" />
+        <activity android:name=".Noti_selectionActivity" />
+        <activity
+            android:name=".InquireMapsActivity"
+            android:label="@string/title_activity_inquire_maps"></activity>
     </application>
 
 </manifest>

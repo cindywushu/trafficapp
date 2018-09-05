@@ -469,9 +469,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
     }
     /********************/
-    public void goto_Main(View view) { //回首頁的button, 按下會關閉服務並回首頁(MainActivity)
+    public void goto_Noti_selection(View view) { //回首頁的button, 按下會關閉服務並回首頁(MainActivity)
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        Intent intent=new Intent(MapsActivity.this,MainActivity.class);
+        Intent intent=new Intent(MapsActivity.this,Noti_selectionActivity.class);
         startActivity(intent);
     }
 

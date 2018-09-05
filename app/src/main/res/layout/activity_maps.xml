@@ -24,11 +24,11 @@
 
         <Button
             android:id="@+id/button"
-            android:layout_width="5pt"
+            android:layout_width="58dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:onClick="goto_Main"
-            android:text="回首頁" />
+            android:onClick="goto_Noti_selection"
+            android:text="返回" />
 
         <TextView
             android:id="@+id/speedtext"

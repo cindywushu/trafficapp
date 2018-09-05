@@ -20,23 +20,10 @@ import android.widget.CheckBox;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    CheckBox allcheck;
-    CheckBox A1check;
-    CheckBox A2check;
-    CheckBox speednoticheck;
-    Boolean all;
-    Boolean A1;
-    Boolean A2;
-    Boolean speednoti;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        allcheck = (CheckBox)findViewById(R.id.all);
-        A1check = (CheckBox)findViewById(R.id.A1);
-        A2check = (CheckBox)findViewById(R.id.A2);
-        speednoticheck = (CheckBox)findViewById(R.id.speed);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -117,41 +104,13 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void goto_Map(View view) {
-        all = allcheck.isChecked();
-        A1 = A1check.isChecked();
-        A2 = A2check.isChecked();
-        speednoti = speednoticheck.isChecked();
+    public void goto_Noti_selection(View view) {
+        Intent intent=new Intent(MainActivity.this,Noti_selectionActivity.class);
+        startActivity(intent);
+    }
 
-        if (!all && !A1 && !A2 && !speednoti){ //若勾選為空
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("注意！")
-                    .setMessage("請選擇服務項目！")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        }else if (all&&(A1 || A2 || speednoti)){ //若勾選為全部及其他選項
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setTitle("注意！")
-                    .setMessage("已重複選擇，請更改！")
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-        }else {
-            Intent intent=new Intent(MainActivity.this,MapsActivity.class);
-            intent.putExtra("all", all);
-            intent.putExtra("A1", A1);
-            intent.putExtra("A2", A2);
-            intent.putExtra("speednoti", speednoti);
-            startActivity(intent);
-        }
+    public void goto_Inquire(View view) {
+        Intent intent=new Intent(MainActivity.this,InquireActivity.class);
+        startActivity(intent);
     }
 }
