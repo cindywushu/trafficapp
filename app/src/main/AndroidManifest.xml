@@ -60,7 +60,7 @@
         <activity android:name=".Noti_selectionActivity" />
         <activity
             android:name=".InquireMapsActivity"
-            android:label="@string/title_activity_inquire_maps"></activity>
+            android:label="@string/title_activity_inquire_maps" />
     </application>
 
 </manifest>

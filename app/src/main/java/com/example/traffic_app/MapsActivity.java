@@ -1,7 +1,10 @@
 package com.example.traffic_app;
 
 import android.Manifest;
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Fragment;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -12,6 +15,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -20,6 +24,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -29,6 +36,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
@@ -68,6 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final long FASTEST_INTERVAL = 1000 * 1;//第一次後每隔1秒執行一次
     static TextView speedtext;//車速顯示的text
     static TextView distancetext;//距離顯示的text
+    static LinearLayout fullscreen;
     double speed;//車速
 
     private static final int NOTIF_ID = 1;
@@ -76,11 +86,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Boolean A2=false;//A2勾選預設為false
     Boolean speednoti=false;//超速提醒勾選預設為false
 
+    ObjectAnimator anim;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        fullscreen = (LinearLayout) findViewById(R.id.fullscreen);
         speedtext = (TextView) findViewById(R.id.speedtext);
         distancetext = (TextView) findViewById(R.id.distancetext);
 
@@ -362,6 +375,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }
                                     notification(); //提醒通知
                                 }
+                                if (distance<100){
+                                    manageBlinkEffect();
+                                }
                             }
                         }else if(A1){ //若勾選A1
                             if (TrafficData.get(i).getCategory().equals("A1")){
@@ -370,6 +386,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     addMarker_RED(); //A1類顯示紅點
                                     notification(); //提醒通知
                                 }
+                                if (distance<100){
+                                    manageBlinkEffect();
+                                }
                             }
                         }else if (A2){ //若勾選A2
                             if (TrafficData.get(i).getCategory().equals("A2")){
@@ -377,6 +396,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     MapsActivity.distancetext.setText("離危險路段距離約: " + new DecimalFormat("#.##").format(distance) + "公尺");
                                     addMarker_ORANGE(); //A2類顯示橘點
                                     notification(); //提醒通知
+                                }
+                                if (distance<100){
+                                    manageBlinkEffect();
                                 }
                             }
                         }
@@ -467,6 +489,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void addMarker_ORANGE(){ //A2類顯示橘點
         mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
                 .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+    }
+    @SuppressLint("WrongConstant")
+    private void manageBlinkEffect() {
+        anim = ObjectAnimator.ofInt(fullscreen, "backgroundColor", Color.alpha(00), Color.RED,
+                Color.WHITE);
+        anim.setDuration(1000);
+        anim.setEvaluator(new ArgbEvaluator());
+        anim.setRepeatMode(Animation.REVERSE);
+        anim.setRepeatCount(Animation.INFINITE);
+        anim.start();
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                anim.cancel();
+            }
+        }, 2000);
     }
     /********************/
     public void goto_Noti_selection(View view) { //回首頁的button, 按下會關閉服務並回首頁(MainActivity)

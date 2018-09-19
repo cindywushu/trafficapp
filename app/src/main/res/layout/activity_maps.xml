@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
@@ -16,49 +15,56 @@
         tools:context="com.example.traffic_app.MapsActivity" />
 
     <LinearLayout
+        android:id="@+id/fullscreen"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="25pt"
-        android:layout_gravity="bottom">
-
-        <Button
-            android:id="@+id/button"
-            android:layout_width="58dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:onClick="goto_Noti_selection"
-            android:text="返回" />
-
-        <TextView
-            android:id="@+id/speedtext"
-            android:layout_width="47dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="left"
-            android:layout_marginRight="40pt"
-            android:layout_weight="3"
-            android:gravity="center"
-            android:textColor="@android:color/black"
-            android:textSize="18sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_gravity="bottom"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/distancetext"
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
             android:layout_weight="1"
-            android:gravity="center"
-            android:textColor="@android:color/black"
-            android:textSize="18sp" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:layout_marginTop="900px">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="25pt"
+                android:orientation="horizontal"
+                android:layout_gravity="bottom" >
+
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="58dp"
+                    android:layout_height="25pt"
+                    android:layout_weight="1"
+                    android:onClick="goto_Noti_selection"
+                    android:text="返回" />
+
+                <TextView
+                    android:id="@+id/speedtext"
+                    android:layout_width="47dp"
+                    android:layout_height="25pt"
+                    android:layout_gravity="left"
+                    android:layout_marginRight="40pt"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/distancetext"
+                android:layout_width="match_parent"
+                android:layout_height="25pt"
+                android:layout_gravity="bottom"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>
