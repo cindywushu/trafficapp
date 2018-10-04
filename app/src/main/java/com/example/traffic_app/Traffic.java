@@ -4,23 +4,23 @@ package com.example.traffic_app;
 public class Traffic {
 
     /**
-     * id : 3
-     * time : 105年01月04日 12時05分
-     * place : 嘉義縣民雄鄉國道一號259公里250公尺處北向外側車道
-     * city : null
-     * nums : 死亡1;受傷0
-     * sort : 營業用-半聯結車;營業用-半聯結車
-     * longitude : 120.41
-     * latitude : 23.5382
-     * category : A1
+     * id : 0
+     * time : 舒婷測試
+     * place : 北商
+     * direction : 北向
+     * nums : null
+     * sort : null
+     * longitude : 121.524
+     * latitude : 25.0423
+     * category : A2
      */
 
     private String id;
     private String time;
     private String place;
-    private Object city;
-    private String nums;
-    private String sort;
+    private String direction;
+    private Object nums;
+    private Object sort;
     private String longitude;
     private String latitude;
     private String category;
@@ -49,27 +49,27 @@ public class Traffic {
         this.place = place;
     }
 
-    public Object getCity() {
-        return city;
+    public String getDirection() {
+        return direction;
     }
 
-    public void setCity(Object city) {
-        this.city = city;
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
 
-    public String getNums() {
+    public Object getNums() {
         return nums;
     }
 
-    public void setNums(String nums) {
+    public void setNums(Object nums) {
         this.nums = nums;
     }
 
-    public String getSort() {
+    public Object getSort() {
         return sort;
     }
 
-    public void setSort(String sort) {
+    public void setSort(Object sort) {
         this.sort = sort;
     }
 

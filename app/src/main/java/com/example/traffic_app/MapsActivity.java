@@ -373,9 +373,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     }else {
                                         addMarker_ORANGE(); //A2類顯示橘點
                                     }
-                                    notification(); //提醒通知
+                                    if (TrafficData.get(i).getDirection().equals("北向")) {
+                                        notification_north(); //北向提醒通知
+                                    }else if (TrafficData.get(i).getDirection().equals("南向")){
+                                        notification_south(); //南向提醒通知
+                                    }
                                 }
-                                if (distance<100){
+                                if (distance<100){ //距離100m以內螢幕閃爍
                                     manageBlinkEffect();
                                 }
                             }
@@ -384,9 +388,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (distance<500){ //顯示所有距離500m內的點
                                     MapsActivity.distancetext.setText("離危險路段距離約: " + new DecimalFormat("#.##").format(distance) + "公尺");
                                     addMarker_RED(); //A1類顯示紅點
-                                    notification(); //提醒通知
+                                    if (TrafficData.get(i).getDirection().equals("北向")) {
+                                        notification_north(); //北向提醒通知
+                                    }else if (TrafficData.get(i).getDirection().equals("南向")){
+                                        notification_south(); //南向提醒通知
+                                    }
                                 }
-                                if (distance<100){
+                                if (distance<100){ //距離100m以內螢幕閃爍
                                     manageBlinkEffect();
                                 }
                             }
@@ -395,9 +403,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 if (distance<500){ //顯示所有距離500m內的點
                                     MapsActivity.distancetext.setText("離危險路段距離約: " + new DecimalFormat("#.##").format(distance) + "公尺");
                                     addMarker_ORANGE(); //A2類顯示橘點
-                                    notification(); //提醒通知
+                                    if (TrafficData.get(i).getDirection().equals("北向")) {
+                                        notification_north(); //北向提醒通知
+                                    }else if (TrafficData.get(i).getDirection().equals("南向")){
+                                        notification_south(); //南向提醒通知
+                                    }
                                 }
-                                if (distance<100){
+                                if (distance<100){ //距離100m以內螢幕閃爍
                                     manageBlinkEffect();
                                 }
                             }
@@ -450,7 +462,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void notification(){ //在設定距離內的危險路段提醒
+    public void notification_north(){ //在設定距離內的北向危險路段提醒
         //使用聲音
         Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.noti_500);
         // 取得NotificationManager系統服務
@@ -462,7 +474,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .setSound(soundUri)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("注意！")
-                        .setContentText("前方五百公尺內為危險路段, 請小心駕駛！");
+                        .setContentText("前方北向五百公尺內為危險路段, 請小心駕駛！");
+        Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
+        intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
+        // 建立PendingIntent物件
+        PendingIntent pIntent = PendingIntent.getActivity(MapsActivity.this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        noti.setContentIntent(pIntent);  // 指定PendingIntent
+        Notification note = noti.build();
+
+        // 使用振動
+        note.vibrate= new long[] {100, 250, 100, 500};
+        // 使用LED
+        note.ledARGB = Color.RED;
+        note.flags |= Notification.FLAG_SHOW_LIGHTS;
+        note.ledOnMS = 200;
+        note.ledOffMS = 300;
+        notiMgr.notify(NOTIF_ID, note);// 送出通知訊息
+    }
+
+    public void notification_south(){ //在設定距離內的南向危險路段提醒
+        //使用聲音
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.noti_500);
+        // 取得NotificationManager系統服務
+        NotificationManager notiMgr = (NotificationManager)
+                getSystemService(NOTIFICATION_SERVICE);
+        // 建立狀態列顯示的通知訊息
+        NotificationCompat.Builder noti =
+                new NotificationCompat.Builder(MapsActivity.this)
+                        .setSound(soundUri)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("注意！")
+                        .setContentText("前方南向五百公尺內為危險路段, 請小心駕駛！");
         Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
         intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
         // 建立PendingIntent物件
