@@ -69,7 +69,9 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
     LatLng dbposition; //資料庫經緯度資料
     LatLng destposition; //查詢的經緯度資料
     LocationRequest mLocationRequest;
-    String  destination;
+    String  destination;//查詢目的地
+    String carselected;//查詢車種
+    String time_slotselected;//查詢時段
     Marker mCurrLocationMarker;//資料庫點的marker
     Marker mMarkers; //查詢的marker
     private static final long INTERVAL = 1000 * 2;//第一次執行時間2秒
@@ -132,6 +134,8 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
+        carselected = getIntent().getExtras().getString("carselected");
+        time_slotselected = getIntent().getExtras().getString("time_slotselected");
     }
 
     public void buildGoogleApiClient() { //Map的Api連線(金鑰認證)
@@ -206,7 +210,7 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
 
         String url = getUrl(yourposition, destposition);
         Log.d("onMapClick", url.toString());
-        FetchUrl FetchUrl = new FetchUrl();
+        InquireFetchUrl FetchUrl = new InquireFetchUrl();
 
         FetchUrl.execute(url);
     }
@@ -341,7 +345,7 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
         return data;
     }
 
-    private class FetchUrl extends AsyncTask<String, Void, String> {
+    private class InquireFetchUrl extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... url) {
@@ -359,16 +363,15 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            ParserTask parserTask = new ParserTask();
+            InquireParserTask parserTask = new InquireParserTask();
             parserTask.execute(result);
-
         }
     }
 
     /**
      * A class to parse the Google Places in JSON format
      */
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+    private class InquireParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
@@ -420,7 +423,6 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
                 lineOptions.color(Color.BLUE);
 
                 Log.d("onPostExecute","onPostExecute lineoptions decoded");
-
             }
 
             if(lineOptions != null) {
@@ -455,13 +457,342 @@ public class InquireMapsActivity extends FragmentActivity implements OnMapReadyC
                     for (int i = 0;i <= TrafficData.size();i++) {
                         //資料庫的經緯度資料的點
                         dbposition = new LatLng(Double.valueOf(TrafficData.get(i).getLatitude()), Double.valueOf(TrafficData.get(i).getLongitude()));
-                        //計算距離
-                        if (TrafficData.get(i).getCategory().equals("A1")){
-                            mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
-                                    .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
-                        }else {
-                            mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
-                                    .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                        if (carselected.equals("全部")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("小客車") && TrafficData.get(i).getMinibus().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("大客車") && TrafficData.get(i).getBus().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("小貨車") && TrafficData.get(i).getSmalltruck().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("大貨車") && TrafficData.get(i).getBigtruck().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("半聯結車") && TrafficData.get(i).getSemijoinedcar().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("全聯結車") && TrafficData.get(i).getFullyconnectedcar().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
+                        }else if (carselected.equals("曳引車") && TrafficData.get(i).getTractioncar().equals("1")){
+                            if (time_slotselected.equals("全部")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("凌晨")&& TrafficData.get(i).getTimeslot().equals("凌")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("早上")&& TrafficData.get(i).getTimeslot().equals("早")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("下午")&& TrafficData.get(i).getTimeslot().equals("午")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }else if (time_slotselected.equals("晚上")&& TrafficData.get(i).getTimeslot().equals("晚")){
+                                if (TrafficData.get(i).getCategory().equals("A1")){
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A1類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_RED)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }else {
+                                    mCurrLocationMarker = mMap.addMarker(new MarkerOptions().position(dbposition).title("A2類").icon(BitmapDescriptorFactory
+                                            .defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));//Mark資料庫的點 HUE_RED/HUE_ORANGE
+                                }
+                            }
                         }
                     }
 

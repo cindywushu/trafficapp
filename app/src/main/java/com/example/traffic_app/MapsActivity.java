@@ -464,7 +464,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void notification_north(){ //在設定距離內的北向危險路段提醒
         //使用聲音
-        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.noti_500);
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.n_noti_500);
         // 取得NotificationManager系統服務
         NotificationManager notiMgr = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
@@ -474,7 +474,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .setSound(soundUri)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("注意！")
-                        .setContentText("前方北向五百公尺內為危險路段, 請小心駕駛！");
+                        .setContentText("往北向 500公尺內為高危險區段,請小心駕駛");
         Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
         intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
         // 建立PendingIntent物件
@@ -495,7 +495,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void notification_south(){ //在設定距離內的南向危險路段提醒
         //使用聲音
-        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.noti_500);
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.s_noti_500);
         // 取得NotificationManager系統服務
         NotificationManager notiMgr = (NotificationManager)
                 getSystemService(NOTIFICATION_SERVICE);
@@ -505,7 +505,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .setSound(soundUri)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle("注意！")
-                        .setContentText("前方南向五百公尺內為危險路段, 請小心駕駛！");
+                        .setContentText("往南向 500公尺內為高危險區段,請小心駕駛");
         Intent intent = new Intent(MapsActivity.this, NotificationActivity.class);
         intent.putExtra("NOTIFICATION_ID", NOTIF_ID);
         // 建立PendingIntent物件
